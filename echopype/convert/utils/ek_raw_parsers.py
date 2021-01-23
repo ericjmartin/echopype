@@ -17,6 +17,7 @@ from collections import Counter
 from .ek_date_conversion import nt_to_unix
 
 TCVR_CH_NUM_MATCHER = re.compile('\d{6}-\w{1,2}')
+TCVR_CH_DEIMOS_NUM_MATCHER = re.compile('\w{6,12}-\w{1,2}')
 
 __all__ = ['SimradNMEAParser', 'SimradDepthParser', 'SimradBottomParser',
             'SimradAnnotationParser', 'SimradConfigParser', 'SimradRawParser']
@@ -807,7 +808,11 @@ class SimradXMLParser(_SimradDatagramParser):
                                          self.transducer_parsing_options)
 
                         # get unique transceiver channel number stored in channel_id
-                        tcvr_ch_num = TCVR_CH_NUM_MATCHER.search(channel_id)[0]
+                        tcvr_ch_num = TCVR_CH_NUM_MATCHER.search(channel_id)
+                        if tcvr_ch_num is None:
+                            tcvr_ch_num = TCVR_CH_DEIMOS_NUM_MATCHER.search(channel_id)
+                        
+                        tcvr_ch_num = tcvr_ch_num[0]
 
                         # parse the Transducers section from the root
                         xducer = root.find('Transducers')
