@@ -4,6 +4,7 @@ Functions to unpack Simrad EK80 .raw data file and save to netCDF or zarr.
 
 import os
 import re
+import traceback
 import shutil
 from collections import defaultdict
 import numpy as np
@@ -498,11 +499,14 @@ class ConvertEK80(ConvertBase):
         decimation_factors = dict()
         for ch in self.ch_ids:
             # Coefficients for wide band transceiver
-            coeffs[f'{ch}_WBT_filter'] = self.fil_coeffs[ch][1]
-            # Coefficients for pulse compression
-            coeffs[f'{ch}_PC_filter'] = self.fil_coeffs[ch][2]
-            decimation_factors[f'{ch}_WBT_decimation'] = self.fil_df[ch][1]
-            decimation_factors[f'{ch}_PC_decimation'] = self.fil_df[ch][2]
+            try:
+                coeffs[f'{ch}_WBT_filter'] = self.fil_coeffs[ch][1]
+                # Coefficients for pulse compression
+                coeffs[f'{ch}_PC_filter'] = self.fil_coeffs[ch][2]
+                decimation_factors[f'{ch}_WBT_decimation'] = self.fil_df[ch][1]
+                decimation_factors[f'{ch}_PC_decimation'] = self.fil_df[ch][2]
+            except KeyError:
+                print(traceback.print_exc())
         out_dict['filter_coefficients'] = coeffs
         out_dict['decimation_factors'] = decimation_factors
         out_dict['xml'] = self.config_datagram['xml']
